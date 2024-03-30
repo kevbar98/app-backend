@@ -1,6 +1,7 @@
 package com.daquilema.appbackend.service.impl;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.daquilema.appbackend.dto.EmployeeDto;
 import com.daquilema.appbackend.entity.Employee;
@@ -16,6 +17,15 @@ import lombok.AllArgsConstructor;
 public class EmployeeServiceImpl implements EmployeeService{
 
 	private EmployeeRepository employeeRepository;
+	
+
+	@Override
+	public EmployeeDto createEmployee(EmployeeDto employeeDto) {
+		Employee employee = EmployeeMapper.mapToEmployee(employeeDto);
+		Employee savedEmployee = employeeRepository.save(employee);
+		
+		return EmployeeMapper.mapToEmployeeDto(savedEmployee);
+	}
 
 	@Override
 	public EmployeeDto getEmployeeByUsuario(String usuario) {
@@ -24,7 +34,32 @@ public class EmployeeServiceImpl implements EmployeeService{
 	    return EmployeeMapper.mapToEmployeeDto(employee);
 	}
 
+	@Override
+	public EmployeeDto updateEmployee(String usuario, EmployeeDto updatedEmployee) {
+		Employee employee = employeeRepository.findByUsuario(usuario)
+			.orElseThrow(()-> new ResourceNotFoundException("El usuario '" + usuario + "' no existe en la base de datos."));
+		
+		employee.setNombre(updatedEmployee.getNombre());
+		employee.setApellido(updatedEmployee.getApellido());
+		employee.setPassword(updatedEmployee.getPassword());
+		
+		Employee updatedEmployeeObj = employeeRepository.save(employee);
+		
+		return EmployeeMapper.mapToEmployeeDto(updatedEmployeeObj);
+	}
+
+	@Override
+	@Transactional
+	public void deleteEmployee(String usuario) {
+	    Employee employee = employeeRepository.findByUsuario(usuario)
+	            .orElseThrow(() -> new ResourceNotFoundException("El usuario '" + usuario + "' no existe en la base de datos."));
+	    employeeRepository.deleteByUsuario(usuario);
+	}
 	
+	@Override
+	public boolean existsByUsuario(String usuario) {
+	    return employeeRepository.findByUsuario(usuario).isPresent();
+	}
 
 	
 	

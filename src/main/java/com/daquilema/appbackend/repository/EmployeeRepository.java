@@ -8,5 +8,6 @@ import com.daquilema.appbackend.entity.Employee;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Integer>{
 	Optional<Employee> findByUsuario(String usuario);
+	void deleteByUsuario(String usuario);
 
 }
